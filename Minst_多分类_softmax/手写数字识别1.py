@@ -3,3 +3,4 @@
 # @Author: Changmeng Yang
 
 print("a")
+print("a")
