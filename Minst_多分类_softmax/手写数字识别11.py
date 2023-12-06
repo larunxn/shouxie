@@ -167,6 +167,7 @@ if __name__ == "__main__":
     linear3_layer = Linear(300, 10)
     softmax_layer = Softmax()
 
+
     epoch = 100
     lr = 0.0003
 
