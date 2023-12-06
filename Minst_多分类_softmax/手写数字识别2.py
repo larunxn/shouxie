@@ -26,7 +26,7 @@ def softmax(x):
     sum_ex = np.sum(ex)
 
     result = ex/sum_ex
-    return  result
+    return result
 
 
 def make_onehot(labels,class_num):
