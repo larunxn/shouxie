@@ -136,19 +136,6 @@ class Softmax:
 
         return G
 
-class ModuleList:
-    def __init__(self,layers):
-        self.layers = layers
-
-    def forward(self,x):
-        for layer in self.layers:
-            x = layer.forward(x)
-        return x
-
-    def backward(self,G):
-        for layer in self.layers[::-1]:
-            G = layer.backward(G)
-
 
 if __name__ == "__main__":
     train_images = load_images(os.path.join("..","data","mnist","train-images.idx3-ubyte"))/255
@@ -169,27 +156,33 @@ if __name__ == "__main__":
     dev_dataset = Dataset(dev_images, dev_labels)
     dev_dataloader = DataLoader(dev_dataset, batch_size, shuffle)
 
-    model = ModuleList([
+    layers = [
         Linear(784, 256),
-        Linear(256, 10),
+        Sigmoid(),
+        Linear(256, 300),
+        Linear(300, 10),
         Softmax()
-    ])
+    ]
 
     epoch = 100
     lr = 0.0001
 
     for e in range(epoch):
         for x, l in train_dataloader:
-            x = model.forward(x)
+            for layer in layers:
+                x = layer.forward(x)
 
             loss = - np.mean(l * np.log(x))
-            model.backward(l)
+
+            for layer in layers[::-1]:
+                l = layer.backward(l)
 
 
 
         right = 0
         for x,batch_labels in dev_dataloader:
-            x = model.forward(x)         # 第四层
+            for layer in layers:
+                x = layer.forward(x)
 
             pre_idx = np.argmax(x, axis = -1)
 
