@@ -98,6 +98,7 @@ class Linear:
         result = x @ self.weight + self.bias
         return result
 
+
 if __name__ == "__main__":
     train_images = load_images(os.path.join("..","data","mnist","train-images.idx3-ubyte"))/255
     train_labels = make_onehot(load_labels(os.path.join("..","data","mnist","train-labels.idx1-ubyte")),10)
