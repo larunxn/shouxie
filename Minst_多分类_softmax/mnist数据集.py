@@ -25,3 +25,4 @@ if __name__ == "__main__":
     train_images = load_images(os.path.join("..","data","mnist","train-images.idx3-ubyte"))
     train_labels = load_labels(os.path.join("..","data","mnist","train-labels.idx1-ubyte"))
     print("")
+
