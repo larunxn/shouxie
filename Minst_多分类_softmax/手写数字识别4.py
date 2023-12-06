@@ -133,6 +133,3 @@ if __name__ == "__main__":
         acc = right / len(dev_dataset)
         print(f"acc: {acc:.3f}")
 
-
-
-
