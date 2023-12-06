@@ -2,13 +2,11 @@
 # @Time: 2023/12/6 16:04
 # @Author: Changmeng Yang
 
-
-
 import numpy as np
 import os
 import struct
 import matplotlib.pyplot as plt
-
+import torch.nn as nn
 
 def load_images(file):  # 加载数据
     with open(file, "rb") as f:
@@ -51,6 +49,8 @@ class DataLoader:
         self.batch_size = batch_size
         self.shuffle = shuffle
 
+
+
     def __iter__(self):
         self.cursor = 0
         return self
@@ -84,18 +84,21 @@ def softmax(x):
     result = np.clip(result,1e-10,1e10)
     return  result
 
+
 def sigmoid(x):
     x = np.clip(x,-100,1e10)
     result = 1/(1 + np.exp(-x))
     return result
 
-class Linear:
-    def __init__(self, in_features, out_features):
-        self.weight = np.random.normal(0, 1, size=(in_features, out_features))
-        self.bias = np.zeros((1, out_features))
 
-    def forward(self, x):
+class Linear:
+    def __init__(self,in_features,out_features):
+        self.weight = np.random.normal(0,1,size=(in_features,out_features))
+        self.bias = np.zeros((1,out_features))
+
+    def forward(self,x):
         result = x @ self.weight + self.bias
+
         self.x = x
         return result
 
@@ -109,27 +112,6 @@ class Linear:
         delta_x = G @ self.weight.T
 
         return delta_x
-
-
-class Sigmoid:
-    def __init__(self):
-        pass
-
-    def forward(self, x):
-        self.result = sigmoid(x)
-        return self.result
-
-    def backward(self, G):
-        return G * self.result * (1 - self.result)
-
-
-class Softmax:
-    def __init__(self):
-        pass
-
-    def forward(self, x):
-        return softmax(x)
-
 
 if __name__ == "__main__":
     train_images = load_images(os.path.join("..","data","mnist","train-images.idx3-ubyte"))/255
@@ -150,39 +132,77 @@ if __name__ == "__main__":
     dev_dataset = Dataset(dev_images, dev_labels)
     dev_dataloader = DataLoader(dev_dataset, batch_size, shuffle)
 
-    linear1 = Linear(784, 256)
-    sigmoid_layer = Sigmoid()
-    linear2 = Linear(256, 300)
-    linear3 = Linear(300, 10)
+    # w1 = np.random.normal(0,1,size=(784,256))
+    # w2 = np.random.normal(0,1,size=(256,300))
+    # w3 = np.random.normal(0,1,size=(300,10))
+    #
+    # b1 = np.zeros((1,256))
+    # b2 = np.zeros((1,300))
+    # b3 = np.zeros((1,10))
+
+    linear1 = Linear(784,256)
+    linear2 = Linear(256,300)
+    linear3 = Linear(300,10)
 
     epoch = 100
-    lr = 0.0001
+    lr = 0.0003
 
     for e in range(epoch):
-        for batch_images, batch_labels in train_dataloader:
-            H1 = linear1.forward(batch_images)  # 第一层
-            H1_S = sigmoid_layer.forward(H1)           # 第二层
-            H2 = linear2.forward(H1_S)          # 第三层
-            pre = linear3.forward(H2)          # 第四层
+        for batch_images,batch_labels in train_dataloader:
+         #  H1 = batch_images @ w1 + b1  # 第一层
+            H1 = linear1.forward(batch_images)
+
+            H1_S = sigmoid(H1)           # 第二层
+
+         #  H2 = H1_S @ w2 + b2          # 第三层
+            H2 = linear2.forward(H1_S)
+
+         #  pre = H2 @  w3 + b3          # 第四层
+            pre = linear3.forward(H2)
 
             p = softmax(pre)
             loss = - np.mean(batch_labels*np.log(p))
 
             G4 = (p - batch_labels) / batch_images.shape[0]  #  第四层 矩阵 C 位置的导数
+
+            # delta_w3 = H2.T @ G4
+            # G3 = delta_H2 = G4 @ linear3.weight.T   # 第三层 矩阵 C 位置的导数
+
             G3 = linear3.backward(G4)
+
+            # delta_w2 = H1_S.T @ G3
+            # delta_H1_S = G3 @ linear2.weight.T      # 第二层 矩阵 C 位置的导数
+
             delta_H1_S = linear2.backward(G3)
-            G1 = sigmoid_layer.backward(delta_H1_S)  #  第一层 矩阵 C 位置的导数
+            G1 = delta_H1 = delta_H1_S * ( H1_S * (1-H1_S))  #  第一层 矩阵 C 位置的导数
+
             linear1.backward(G1)
+            # delta_w1 = batch_images.T  @ G1
+            # delta_b3 = np.mean(G4,axis=0,keepdims=True)
+            # delta_b2 = np.mean(G3,axis=0,keepdims=True)
+            # delta_b1 = np.mean(G1,axis=0,keepdims=True)
+            #
+            # linear1.weight -= lr * delta_w1
+            # linear2.weight  -= lr * delta_w2
+            # linear3.weight  -= lr * delta_w3
+            # linear1.bias  -= lr * delta_b1
+            # linear2.bias -= lr * delta_b2
+            # linear3.bias -= lr * delta_b3
 
         right = 0
         for batch_images,batch_labels in dev_dataloader:
+            #  H1 = batch_images @ w1 + b1  # 第一层
+            H1 = linear1.forward(batch_images)
 
-            H1 = linear1.forward(batch_images)  # 第一层
-            H1_S = sigmoid(H1)           # 第二层
-            H2 = linear2.forward(H1_S)          # 第三层
-            pre = linear3.forward(H2)          # 第四层
+            H1_S = sigmoid(H1)  # 第二层
 
-            pre_idx = np.argmax(pre, axis = -1)
+            #  H2 = H1_S @ w2 + b2          # 第三层
+            H2 = linear2.forward(H1_S)
+
+            #  pre = H2 @  w3 + b3          # 第四层
+            pre = linear3.forward(H2)
+
+            pre_idx = np.argmax(pre,axis = -1)
 
             right += np.sum(pre_idx == batch_labels)
         acc = right/len(dev_dataset)
