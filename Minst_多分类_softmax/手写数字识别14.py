@@ -75,14 +75,17 @@ class DataLoader:
 
 
 def softmax(x):
-    x = np.clip(x,-1e10,100)
+    max_x = np.max(x,axis = -1,keepdims=True)
+    x = x - max_x
+
+    # x = np.clip(x, -1e10, 100)
     ex = np.exp(x)
-    sum_ex = np.sum(ex,axis=1,keepdims=True)
+    sum_ex = np.sum(ex, axis=1, keepdims=True)
 
-    result = ex/sum_ex
+    result = ex / sum_ex
 
-    result = np.clip(result,1e-10,1e10)
-    return  result
+    result = np.clip(result, 1e-10, 1e10)
+    return result
 
 def sigmoid(x):
     x = np.clip(x,-100,1e10)
