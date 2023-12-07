@@ -177,7 +177,7 @@ if __name__ == "__main__":
     ])
 
     epoch = 100
-    lr = 0.0001
+    lr = 0.01
 
     for e in range(epoch):
         for x, l in train_dataloader:
