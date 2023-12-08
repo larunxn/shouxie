@@ -56,6 +56,7 @@ if __name__ == '__main__':
     w1 = np.random.normal(size=(words_len, embedding_num))
     w2 = np.random.normal(size=(embedding_num, words_len))
 
+
     for e in range(epoch):
         for words in tqdm(all_data):
             for ni, now_word in enumerate(words):
