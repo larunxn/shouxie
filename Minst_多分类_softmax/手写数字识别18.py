@@ -197,7 +197,7 @@ class MSGD():
     def step(self):
         for param in self.parameters:
             # param.weight = param.weight - self.lr * param.grad
-            param.weight =   param.weight - self.lr * ((1-self.u)*param.grad + self.u*param.last_grad)
+            param.weight = param.weight - self.lr * ((1-self.u)*param.grad + self.u*param.last_grad)
             param.last_grad = param.grad
 
     def zero_grad(self):
