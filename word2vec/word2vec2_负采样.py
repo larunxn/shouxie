@@ -67,6 +67,7 @@ if __name__ == '__main__':
     index_2_word = list(word_2_index)
     word_2_onehot = build_word_2_onehot(words_len)
 
+
     epoch = 10
     n_gram = 2
     negative = 10
