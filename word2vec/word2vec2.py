@@ -51,7 +51,7 @@ if __name__ == '__main__':
 
     epoch = 10
     n = 4
-    embedding_num = 200
+    embedding_num = 300
     lr = 0.01
 
     w1 = np.random.normal(size=(words_len, embedding_num))
