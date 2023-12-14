@@ -35,7 +35,7 @@ def get_words_sim_score(word1, word2):
 
 
 if __name__ == '__main__':
-    with open("wordvec_new.abc","rb") as f:
+    with open("wordvec.abc","rb") as f:
         w1 = pickle.load(f)
 
     with open("word2index.123","rb") as f:
